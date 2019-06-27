@@ -117,14 +117,17 @@ for i in range(z):
     PhiData = PhiData.append(phid)
     IntensityData = IntensityData.append(Iwd)
 
+#Also will make a dataset to encode frequency domain
+FrequencyData = pd.DataFrame(w).T
+
 #Rename columns annd rows for better readability
 for i in range(n):
     PhiData = PhiData.rename(columns={i:'Phi' + str(i+1)})
 for i in range(1000):
     IntensityData = IntensityData.rename(columns={i:'I' + str(i+1)})
-IntensityData.index = np.arange(1,z+1)
-PhiData.index = np.arange(1,z+1)
+    FrequencyData = FrequencyData.rename(columns={i:'w' + str(i+1)})
 
 IntensityData.to_csv('Intensity.csv', index=False)
 PhiData.to_csv('Phis.csv', index=False)
+FrequencyData.to_csv('Frequency.csv', index=False)
 
