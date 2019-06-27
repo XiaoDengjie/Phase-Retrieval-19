@@ -11,21 +11,51 @@ Change:         2019/6/17  上午12:24    Dengjie Xiao        Create
 import numpy as np
 import numpy.fft as fft
 from matplotlib.pyplot import imread as mlimr
-import scipy.misc as misc
+import scipy as misc
 from imageio import imwrite
 from math import pi
 import matplotlib.pyplot as plt
 import cv2
 import pandas as pd
 
-save_path = "/Users/xiaodengjie/Desktop/Phase Retrieval Code/Image-Reconstruction/save/save9-XTCAV/"
-pic_path = "/Users/xiaodengjie/Desktop/Phase Retrieval Code/Image-Reconstruction/pic/"
+#save_path = "/User/users/Desktop/Image-Reconstruction/save8-fel/"
+#pic_path = r"C:\Users\user\Desktop\test_phase\"
 
 # Read in source image
 # source = mlimr("einstein.bmp")
 
-source = mlimr(pic_path+"fel.png")[0:218,0:218]
-source = cv2.cvtColor(source, cv2.COLOR_RGB2GRAY)
+def crop_image(img, pad_len, source_width, source_height):
+    #img is image data
+    #tol is tolerance
+    if source_width > source_height:
+        s = source_width
+    else:
+        s= source_height
+
+    x1, y1 = pad_len + s , pad_len + s
+    x0, y0 = pad_len, pad_len + 1
+
+    cropped = img[x0 : x1, y0 : y1]
+    return cropped
+
+img = cv2.imread("hoovertower.jpg")
+img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+source_height, source_width = img.shape[:2]
+
+source = img
+
+if source_height > source_width:
+    diff = source_height - source_width
+    source = cv2.copyMakeBorder(img, 0, 0, 0, diff, cv2.BORDER_CONSTANT,
+                                value = [0, 0, 0])
+
+if source_width > source_height:
+    diff = source_width - source_height
+    source = cv2.copyMakeBorder(img, 0, diff, 0, 0, cv2.BORDER_CONSTANT,
+                                value = [0, 0, 0])
+
+
+
 
 # Pad image to simulate oversampling
 pad_len = len(source)
@@ -36,7 +66,7 @@ padded = np.pad(source, ((pad_len, pad_len), (pad_len, pad_len)), 'constant',
 ft = fft.fft2(padded)
 #save start phase
 df_inv = pd.DataFrame(np.angle(ft))
-df_inv.to_csv(save_path + str('start') + "phase.csv")
+df_inv.to_csv( str('start') + "phase.csv")
 
 
 # simulate diffraction pattern
@@ -103,11 +133,13 @@ for s in range(0, r):
     # save an image of the progress
     if s % 100 == 0:
         # imwrite
-        plt.imshow(prev)
-        plt.savefig(save_path + str(s) + '.jpg')  # , prev  ".bmp"
+        res = crop_image(prev, pad_len, source_width, source_height)
+        plt.imshow(res)
+        plt.axis("off")
+        plt.savefig(str(s) + '.jpg')  # , prev  ".bmp"
 
         df_inv = pd.DataFrame(np.angle(guess))
-        df_inv.to_csv(save_path + str(s) + "phase.csv")
+        df_inv.to_csv(str(s) + "phase.csv")
         # break #test save csv
         print(s)
 
