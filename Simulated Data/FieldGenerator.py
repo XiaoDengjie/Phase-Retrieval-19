@@ -81,10 +81,12 @@ wks = np.ones(n)*w_cen #np.random.normal(w_cen,10**-4*w_cen,n) true variation
 phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
 tks = np.arange(1,n+1)*1e-15 #Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
-t=np.arange(0,(n+1)*1e-15,12e-18) #Time domain
+#Time domain
+t=np.arange(0,(n+1)*1e-15,12e-18)
 #Frequency Domain
+x = 1000 #Number of points to test in frequeny domain
 wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequency
-w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/1000)
+w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)
 
 '''
 Way to generate electric field in time domain
@@ -106,7 +108,7 @@ PhiData = pd.DataFrame()
 IntensityData = pd.DataFrame()
 
 #Function to generate data
-z = 10
+z = 10000
 for i in range(z):
     phiks = np.random.random(n)*2*np.pi
     efieldtmpf = freq_Efield(Aks,wks,phiks,tks,sigmaks,w)
@@ -116,6 +118,7 @@ for i in range(z):
     Iwd = pd.DataFrame(Iw).T
     PhiData = PhiData.append(phid)
     IntensityData = IntensityData.append(Iwd)
+    print(i)
 
 #Also will make a dataset to encode frequency domain
 FrequencyData = pd.DataFrame(w).T
@@ -123,10 +126,11 @@ FrequencyData = pd.DataFrame(w).T
 #Rename columns annd rows for better readability
 for i in range(n):
     PhiData = PhiData.rename(columns={i:'Phi' + str(i+1)})
-for i in range(1000):
+for i in range(x):
     IntensityData = IntensityData.rename(columns={i:'I' + str(i+1)})
     FrequencyData = FrequencyData.rename(columns={i:'w' + str(i+1)})
 
+#Print out DataFrames to csv files
 IntensityData.to_csv('Intensity.csv', index=False)
 PhiData.to_csv('Phis.csv', index=False)
 FrequencyData.to_csv('Frequency.csv', index=False)
