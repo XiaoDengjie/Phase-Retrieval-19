@@ -1,4 +1,4 @@
-Upload you data with a folder named "month/DD".
+Upload you data with a folder named "month-DD". 
 
 Upload results and algorithm code of this data to appropriate folder. (For Sharon & DJ)
 
