@@ -105,33 +105,44 @@ field modulus squared
 
 #Create empty Pandas DataFrames to append to with data
 PhiData = pd.DataFrame()
-IntensityData = pd.DataFrame()
+IntensityFreqData = pd.DataFrame()
+IntensityTimeData = pd.DataFrame()
 
 #Function to generate data
-z = 10000
+z = 10
 for i in range(z):
     phiks = np.random.random(n)*2*np.pi
+    efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
+    tfield = efieldtmpt.time_field()
+    It = np.abs(tfield)**2
     efieldtmpf = freq_Efield(Aks,wks,phiks,tks,sigmaks,w)
     ffield = efieldtmpf.freq_field()
     Iw = np.abs(ffield)**2
     phid = pd.DataFrame(phiks).T
     Iwd = pd.DataFrame(Iw).T
+    Itd = pd.DataFrame(It).T
     PhiData = PhiData.append(phid)
-    IntensityData = IntensityData.append(Iwd)
+    IntensityFreqData = IntensityFreqData.append(Iwd)
+    IntensityTimeData = IntensityTimeData.append(Itd)
     print(i)
 
 #Also will make a dataset to encode frequency domain
 FrequencyData = pd.DataFrame(w).T
+TimeData = pd.DataFrame(t).T
 
 #Rename columns annd rows for better readability
 for i in range(n):
     PhiData = PhiData.rename(columns={i:'Phi' + str(i+1)})
 for i in range(x):
-    IntensityData = IntensityData.rename(columns={i:'I' + str(i+1)})
+    IntensityTimeData = IntensityTimeData.rename(columns={i:'I' + str(i+1)})
+    IntensityFreqData = IntensityFreqData.rename(columns={i:'I' + str(i+1)})
+    TimeData = TimeData.rename(columns={i:'t' + str(i+1)})
     FrequencyData = FrequencyData.rename(columns={i:'w' + str(i+1)})
 
 #Print out DataFrames to csv files
-IntensityData.to_csv('Intensity.csv', index=False)
+IntensityFreqData.to_csv('FreqIntensity.csv', index=False)
+IntensityTimeData.to_csv('TimeIntensity.csv', index=False)
 PhiData.to_csv('Phis.csv', index=False)
 FrequencyData.to_csv('Frequency.csv', index=False)
+TimeData.to_csv('Time.csv', index=False)
 
