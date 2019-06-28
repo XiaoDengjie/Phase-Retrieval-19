@@ -109,7 +109,7 @@ IntensityFreqData = pd.DataFrame()
 IntensityTimeData = pd.DataFrame()
 
 #Function to generate data
-z = 10
+z = 10 #Number of datasets generated
 for i in range(z):
     phiks = np.random.random(n)*2*np.pi
     efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
@@ -126,7 +126,7 @@ for i in range(z):
     IntensityTimeData = IntensityTimeData.append(Itd)
     print(i)
 
-#Also will make a dataset to encode frequency domain
+#Also will make a dataset to encode domains
 FrequencyData = pd.DataFrame(w).T
 TimeData = pd.DataFrame(t).T
 
