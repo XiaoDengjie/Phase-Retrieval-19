@@ -9,6 +9,7 @@ Created on Mon Jun 24 09:18:28 2019
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 
 class time_Efield(object):
     #Generate the electric field in the time domain.
@@ -52,7 +53,7 @@ class freq_Efield(object):
         self.w = w
     def freq_single(self, Ak,wk,phik,tk,sigmak):
         #note: t should be an numpy array
-        phase = -self.w*tk+phik 
+        phase = -self.w*tk+phik+wk*tk
         gaussian = -(sigmak**2*(self.w-wk)**2)/2
         Efield_single = Ak*sigmak*np.exp(1j*phase)*np.exp(gaussian)
         return Efield_single
@@ -68,6 +69,7 @@ class freq_Efield(object):
 e_charge = 1.602176565e-19
 h_plank = 6.62607004e-34
 c_speed = 299792458
+x = 1000 #Number of points to test in frequeny and time domain
 
 #Inputs
 ph_en = 8300 #in the uint of eV
@@ -82,9 +84,8 @@ phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
 tks = np.arange(1,n+1)*1e-15 #Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
 #Time domain
-t=np.arange(0,(n+1)*1e-15,12e-18)
+t=np.linspace(0,(n+1)*1e-15,x)
 #Frequency Domain
-x = 1000 #Number of points to test in frequeny domain
 wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequency
 w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)
 
@@ -140,9 +141,15 @@ for i in range(x):
     FrequencyData = FrequencyData.rename(columns={i:'w' + str(i+1)})
 
 #Print out DataFrames to csv files
-IntensityFreqData.to_csv('FreqIntensity.csv', index=False)
-IntensityTimeData.to_csv('TimeIntensity.csv', index=False)
-PhiData.to_csv('Phis.csv', index=False)
-FrequencyData.to_csv('Frequency.csv', index=False)
-TimeData.to_csv('Time.csv', index=False)
+directory = "July-01"
+current_directory = os.getcwd()
+final_directory = os.path.join(current_directory, directory)
+if not os.path.exists(final_directory):
+   os.makedirs(final_directory)
 
+
+IntensityFreqData.to_csv(final_directory + '/FreqIntensity.csv', index=False)
+IntensityTimeData.to_csv(final_directory + '/TimeIntensity.csv', index=False)
+PhiData.to_csv(final_directory + '/Phis.csv', index=False)
+FrequencyData.to_csv(final_directory + '/Frequency.csv', index=False)
+TimeData.to_csv(final_directory + '/Time.csv', index=False)
