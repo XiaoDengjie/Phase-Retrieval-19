@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import datetime
 
 class time_Efield(object):
     #Generate the electric field in the time domain.
@@ -74,7 +75,7 @@ x = 1000 #Number of points to test in frequeny and time domain
 #Inputs
 ph_en = 8300 #in the uint of eV
 w_cen =  ph_en * e_charge /h_plank *2* np.pi #frequency of radiation
-n = 5 #Number of modes
+n = 2 #Number of modes
 #np.random.seed(1) #Set seed if want to create reproducable results
 
 #Parameters
@@ -140,16 +141,21 @@ for i in range(x):
     TimeData = TimeData.rename(columns={i:'t' + str(i+1)})
     FrequencyData = FrequencyData.rename(columns={i:'w' + str(i+1)})
 
-#Print out DataFrames to csv files
-directory = "July-01"
+#Retrieve date to automatically create directory
+now = datetime.datetime.now()
+month = now.strftime("%B")
+day = now.strftime("%d")
+
+directory = month + "-" + day
 current_directory = os.getcwd()
-final_directory = os.path.join(current_directory, directory)
+print(current_directory)
+final_directory = os.path.join(current_directory + "\Dataset", directory)
 if not os.path.exists(final_directory):
    os.makedirs(final_directory)
 
-
-IntensityFreqData.to_csv(final_directory + '/FreqIntensity.csv', index=False)
-IntensityTimeData.to_csv(final_directory + '/TimeIntensity.csv', index=False)
-PhiData.to_csv(final_directory + '/Phis.csv', index=False)
-FrequencyData.to_csv(final_directory + '/Frequency.csv', index=False)
-TimeData.to_csv(final_directory + '/Time.csv', index=False)
+#Print out DataFrames to csv files
+IntensityFreqData.to_csv(final_directory + '\FreqIntensity.csv', index=False)
+IntensityTimeData.to_csv(final_directory + '\TimeIntensity.csv', index=False)
+PhiData.to_csv(final_directory + '\Phis.csv', index=False)
+FrequencyData.to_csv(final_directory + '\Frequency.csv', index=False)
+TimeData.to_csv(final_directory + '\Time.csv', index=False)
