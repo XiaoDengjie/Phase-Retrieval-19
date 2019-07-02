@@ -2,6 +2,8 @@ Aaron give a first dataset, which is one dimension.
 
 This data was generated with normalized constants except for random Phis.
 
+5 Modes: n = 5
+
 phiks = np.random.random(n)*2*np.pi
 
 Aks = np.ones(n)
