@@ -75,8 +75,8 @@ x = 1000 #Number of points to test in frequeny and time domain
 #Inputs
 ph_en = 8300 #in the uint of eV
 w_cen =  ph_en * e_charge /h_plank *2* np.pi #frequency of radiation
-n = 2 #Number of modes
-#np.random.seed(1) #Set seed if want to create reproducable results
+n = 3 #Number of modes
+np.random.seed(1) #Set seed if want to create reproducable results
 
 #Parameters
 Aks = np.ones(n) #np.random.rayleigh(size=n) is true variation
@@ -85,7 +85,7 @@ phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
 tks = np.arange(1,n+1)*1e-15 #Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
 #Time domain
-t=np.linspace(0,(n+1)*1e-15,x)
+t=np.linspace(-1e-15,(n+1)*2e-15,x)
 #Frequency Domain
 wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequency
 w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)
