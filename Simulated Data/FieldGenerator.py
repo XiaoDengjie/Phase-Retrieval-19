@@ -85,7 +85,7 @@ phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
 tks = np.arange(1,n+1)*1e-15 #Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
 #Time domain
-t=np.linspace(-1e-15,(n+1)*2e-15,x)
+t=np.linspace(-1e-15,(n+1)*1e-15 + 1e-15,x)
 #Frequency Domain
 wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequency
 w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)

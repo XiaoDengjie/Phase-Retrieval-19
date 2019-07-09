@@ -62,7 +62,6 @@ sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
 
 #Time domain
 t=np.linspace(-5e-15,(n+1)*1e-15+5e-15,x)
-freq = np.fft.fftfreq(len(tfield))
 
 #Create empty Pandas DataFrames to append to with data
 PhiData = pd.DataFrame()
