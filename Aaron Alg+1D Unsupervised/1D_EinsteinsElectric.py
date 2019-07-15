@@ -1,16 +1,6 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jun 24 09:18:28 2019
-
-@author: gzhou + aholm
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
-import datetime
 
 class time_Efield(object):
     #Generate the electric field in the time domain.
@@ -65,7 +55,6 @@ class freq_Efield(object):
                   self.phiks[i],self.tks[i],self.sigmaks[i])
         return np.sum(efield,axis=0)
 
-
 #Constants
 e_charge = 1.602176565e-19
 h_plank = 6.62607004e-34
@@ -85,77 +74,54 @@ phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
 tks = np.arange(1,n+1)*1e-15 #Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
 #Time domain
-t=np.linspace(-1e-15,(n+1)*1e-15 + 1e-15,x)
+t=np.linspace(-5e-15,(n+1)*1e-15 + 5e-15,x)
 #Frequency Domain
 wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequency
 w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)
 
-'''
-Way to generate electric field in time domain
+
+#Generate electric fields in time and frequency domains
 efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
 tfield = efieldtmpt.time_field()
-plt.plot(t,abs(tfield)**2)
 
-Way to generate electric field in frequency domain
 efieldtmpf = freq_Efield(Aks,wks,phiks,tks,sigmaks,w)
 ffield = efieldtmpf.freq_field()
-plt.plot(w,abs(ffield)**2)
 
-Important Note is that we are dealing with Intensity which is the E
-field modulus squared
-'''
+TimeE = tfield
+FreqE = np.fft.fft(tfield) #*np.exp(1j*np.pi/4)
+phase = 2*np.pi*np.random.random(len(FreqE))
 
-#Create empty Pandas DataFrames to append to with data
-PhiData = pd.DataFrame()
-IntensityFreqData = pd.DataFrame()
-IntensityTimeData = pd.DataFrame()
+# =============================================================================
+# plt.figure()
+# plt.plot(np.abs(ffield)**2)
+# plt.figure()
+# plt.plot(np.abs(FreqE)**2)
+# =============================================================================
+plt.figure()
+plt.plot(np.real(ffield))
+plt.plot(np.imag(ffield))
+plt.figure()
+plt.plot(np.real(FreqE))
+plt.plot(np.imag(FreqE))
 
-#Function to generate data
-z = 1 #Number of datasets generated
-for i in range(z):
-    phiks = np.random.random(n)*2*np.pi
-    efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
-    tfield = efieldtmpt.time_field()
-    It = np.abs(tfield)**2
-    efieldtmpf = freq_Efield(Aks,wks,phiks,tks,sigmaks,w)
-    ffield = efieldtmpf.freq_field()
-    Iw = np.abs(ffield)**2
-    phid = pd.DataFrame(phiks).T
-    Iwd = pd.DataFrame(Iw).T
-    Itd = pd.DataFrame(It).T
-    PhiData = PhiData.append(phid)
-    IntensityFreqData = IntensityFreqData.append(Iwd)
-    IntensityTimeData = IntensityTimeData.append(Itd)
-    print(i)
+plt.figure()
+plt.plot(t,tfield)
+plt.title('Electric Field')
+plt.xlabel('Time')
+plt.ylabel('Intensity')
 
-#Also will make a dataset to encode domains
-FrequencyData = pd.DataFrame(w).T
-TimeData = pd.DataFrame(t).T
-
-#Rename columns annd rows for better readability
-for i in range(n):
-    PhiData = PhiData.rename(columns={i:'Phi' + str(i+1)})
-for i in range(x):
-    IntensityTimeData = IntensityTimeData.rename(columns={i:'I' + str(i+1)})
-    IntensityFreqData = IntensityFreqData.rename(columns={i:'I' + str(i+1)})
-    TimeData = TimeData.rename(columns={i:'t' + str(i+1)})
-    FrequencyData = FrequencyData.rename(columns={i:'w' + str(i+1)})
-
-#Retrieve date to automatically create directory
-now = datetime.datetime.now()
-month = now.strftime("%B")
-day = now.strftime("%d")
-
-directory = month + "-" + day
-current_directory = os.getcwd()
-print(current_directory)
-final_directory = os.path.join(current_directory + "\Dataset", directory)
-if not os.path.exists(final_directory):
-   os.makedirs(final_directory)
-
-#Print out DataFrames to csv files
-IntensityFreqData.to_csv(final_directory + '\FreqIntensity.csv', index=False)
-IntensityTimeData.to_csv(final_directory + '\TimeIntensity.csv', index=False)
-PhiData.to_csv(final_directory + '\Phis.csv', index=False)
-FrequencyData.to_csv(final_directory + '\Frequency.csv', index=False)
-TimeData.to_csv(final_directory + '\Time.csv', index=False)
+# =============================================================================
+# n = 101
+# for i in range(n):
+#     GuessFreq = np.exp(1j*phase)*FreqE
+#     Time_ifft = np.fft.ifft(GuessFreq)
+#     Real_Time_ifft = np.abs(Time_ifft)
+#     Freq_fft = np.fft.fft(Real_Time_ifft)
+#     phase = np.angle(Freq_fft)
+#     if (i % 20) == 0:
+#         plt.figure(i)
+#         plt.plot(Real_Time_ifft)
+# 
+# plt.figure()
+# plt.plot(TimeE)
+# =============================================================================
