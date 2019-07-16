@@ -32,29 +32,6 @@ class time_Efield(object):
                   self.phiks[i],self.tks[i],self.sigmaks[i])
         return np.sum(efield,axis=0)
 
-class freq_Efield(object):
-
-    def __init__(self, Aks,wks,phiks,tks,sigmaks,w):
-        self.Aks = Aks
-        self.wks = wks
-        self.phiks = phiks
-        self.tks = tks
-        self.sigmaks = sigmaks
-        self.modes_num = len(Aks)
-        self.w = w
-    def freq_single(self, Ak,wk,phik,tk,sigmak):
-        #note: t should be an numpy array
-        phase = -self.w*tk+phik+wk*tk
-        gaussian = -(sigmak**2*(self.w-wk)**2)/2
-        Efield_single = Ak*sigmak*np.exp(1j*phase)*np.exp(gaussian)
-        return Efield_single
-    def freq_field(self):
-        efield = np.zeros([self.modes_num,len(self.w)],dtype=complex)
-        for i in range(self.modes_num):
-            efield[i,:] = self.freq_single(self.Aks[i],self.wks[i],\
-                  self.phiks[i],self.tks[i],self.sigmaks[i])
-        return np.sum(efield,axis=0)
-
 #Constants
 e_charge = 1.602176565e-19
 h_plank = 6.62607004e-34
@@ -80,48 +57,79 @@ wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequen
 w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)
 
 
+
+
+
+
 #Generate electric fields in time and frequency domains
 efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
-tfield = efieldtmpt.time_field()
+TimeE = efieldtmpt.time_field()
+FreqE = np.fft.fft(TimeE)
 
-efieldtmpf = freq_Efield(Aks,wks,phiks,tks,sigmaks,w)
-ffield = efieldtmpf.freq_field()
+TimeAmp = np.abs(TimeE)
+FreqAmp = np.abs(FreqE)
 
-TimeE = tfield
-FreqE = np.fft.fft(tfield) #*np.exp(1j*np.pi/4)
-phase = 2*np.pi*np.random.random(len(FreqE))
+def GS(TimeE,FreqE):
+    phase_time = 2*np.pi*np.random.random(len(TimeE))
+    n = 0
+    FreqError = 10
+    TimeError = 10
+    MinFreqError = 10**-0
+    MinTimeError = 10**-1
+    while FreqError >= MinFreqError and TimeError >= MinTimeError and n<= 300:
+        Et = np.exp(1j*phase_time)*TimeE
+        Guess_Freq = np.fft.fft(Et)
+        FreqError = np.linalg.norm(Guess_Freq - FreqE)
+        DiffError = np.linalg.norm(np.abs(Guess_Freq)-FreqAmp)
+        print(DiffError)
+        phase_freq = np.angle(Guess_Freq)
+        Ew = np.exp(1j*phase_freq)*FreqE
+        Guess_Time = np.fft.ifft(Ew)
+        TimeError = np.linalg.norm(Guess_Time - TimeE)
+        phase_time = np.angle(Guess_Time)
+        n+= 1
+    return Et, Ew, n
 
-# =============================================================================
-# plt.figure()
-# plt.plot(np.abs(ffield)**2)
-# plt.figure()
-# plt.plot(np.abs(FreqE)**2)
-# =============================================================================
-plt.figure()
-plt.plot(np.real(ffield))
-plt.plot(np.imag(ffield))
-plt.figure()
-plt.plot(np.real(FreqE))
-plt.plot(np.imag(FreqE))
 
-plt.figure()
-plt.plot(t,tfield)
-plt.title('Electric Field')
-plt.xlabel('Time')
-plt.ylabel('Intensity')
+a,b,c = GS(TimeAmp,FreqAmp)
 
-# =============================================================================
-# n = 101
-# for i in range(n):
-#     GuessFreq = np.exp(1j*phase)*FreqE
-#     Time_ifft = np.fft.ifft(GuessFreq)
-#     Real_Time_ifft = np.abs(Time_ifft)
-#     Freq_fft = np.fft.fft(Real_Time_ifft)
-#     phase = np.angle(Freq_fft)
-#     if (i % 20) == 0:
-#         plt.figure(i)
-#         plt.plot(Real_Time_ifft)
-# 
-# plt.figure()
-# plt.plot(TimeE)
-# =============================================================================
+z = 100
+AllTime=np.zeros((1000,z),dtype=complex)
+AllFreq=np.zeros((1000,z),dtype=complex)
+AllIterations = np.zeros(z)
+for i in range(z):
+    np.random.seed(i)
+    ElectricTime, ElectricFreq, Iterations = GS(TimeAmp,FreqAmp)
+    AllTime[:,i] = ElectricTime
+    AllFreq[:,i] = ElectricFreq
+    AllIterations[i] = Iterations
+
+
+plt.plot(AllIterations)
+
+NormDiff = np.zeros(z)
+
+for i in range(z):
+    Difference = AllTime[:,i] - TimeE
+    AbsDiff = np.abs(Difference)**2
+    Norm = np.linalg.norm(AbsDiff)
+    NormDiff[i] = Norm
+
+plt.plot(NormDiff)
+
+print(TimeE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
