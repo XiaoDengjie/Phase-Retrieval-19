@@ -66,27 +66,24 @@ efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
 TimeE = efieldtmpt.time_field()
 FreqE = np.fft.fft(TimeE)
 
-def GSFreq(iterations,FreqE):
+FreqAmp = np.abs(FreqE)
+
+def GSFreq(iterations,FreqAmp):
     np.random.seed(1)
-    FreqAmp = np.abs(FreqE)
     phase_freq = 2*np.pi*np.random.random(len(FreqAmp))
     for i in range(iterations):
         Ew = np.exp(1j*phase_freq)*FreqAmp
-    #    print(np.exp(1j*phase_freq),FreqAmp)
         Guess_Time = np.fft.ifft(Ew)
         RealTime = np.real(Guess_Time)
         Guess_Freq = np.fft.fft(RealTime)
         phase_freq = np.angle(Guess_Freq)
-        
-       # plt.plot(RealTime)
-    FinalFreq = np.fft.rfft(RealTime)
+    FinalFreq = Guess_Time
     return FinalFreq
 
 def GSTime(iterations,TimeE):
     TimeAmp = np.abs(TimeE)
     phase_time = 2*np.pi*np.random.random(len(TimeAmp))
-    n = iterations
-    for i in range(n):
+    for i in range(iterations):
         Et = np.exp(1j*phase_time)*TimeAmp
         Guess_Freq = np.fft.fft(Et)
         RealFreq = np.real(Guess_Freq)
@@ -95,23 +92,16 @@ def GSTime(iterations,TimeE):
     FinalTime = np.fft.rifft(RealFreq)
     return FinalTime
 
-Guess_Freq1 = GSFreq(1,FreqE)
-Guess_Freq2 = GSFreq(3,FreqE)
-Guess_Freq3 = GSFreq(100,FreqE)
-print(np.linalg.norm(np.abs(Guess_Freq1-FreqE[0:501])))
-print(np.linalg.norm(np.abs(Guess_Freq2-FreqE[0:501])))
-print(np.linalg.norm(np.abs(Guess_Freq3-FreqE[0:501])))
+freqs = np.array(pd.read_csv("FreqElectric.csv").iloc[:,1])
+
+Guess_Freq1 = GSFreq(1,FreqAmp)
+Guess_Freq2 = GSFreq(2,FreqAmp)
+Guess_Freq3 = GSFreq(3,FreqAmp)
+#Guess_Freq4 = GSFreq(4,freqs)
+plt.plot(FreqAmp[90:140])
+plt.figure()
 plt.plot(Guess_Freq1)
 plt.plot(Guess_Freq2)
 plt.plot(Guess_Freq3)
-'''
-plt.figure()
-plt.plot(FreqE[0:501])
-plt.plot(Guess_Freq1,linestyle='dashed')
-plt.figure()
-plt.plot(np.imag(FreqE[0:501]))
-plt.plot(np.imag(Guess_Freq1),linestyle='dashed')
-plt.figure()
-plt.plot(np.abs(FreqE[0:501]))
-plt.plot(np.abs(Guess_Freq1),linestyle='dashed')
-'''
+#plt.plot(Guess_Freq4)
+
