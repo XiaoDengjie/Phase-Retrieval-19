@@ -45,13 +45,14 @@ class time_Efield(object):
 e_charge = 1.602176565e-19
 h_plank = 6.62607004e-34
 c_speed = 299792458
-x = 1000 #Number of points to test in frequeny and time domain
+#MUST BE AN ODD NUMBER
+x = 1001 #Number of points to test in frequeny and time domain
 
 #Inputs
 ph_en = 8300 #in the uint of eV
 w_cen =  ph_en * e_charge /h_plank *2* np.pi #frequency of radiation
-n = 3 #Number of modes
-#np.random.seed(1) #Set seed if want to create reproducable results
+n = 2 #Number of modes
+np.random.seed(1) #Set seed if want to create reproducable results
 
 #Parameters
 Aks = np.ones(n) #np.random.rayleigh(size=n) is true variation
@@ -59,9 +60,29 @@ wks = np.ones(n)*w_cen #np.random.normal(w_cen,10**-4*w_cen,n) true variation
 phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
 tks = np.arange(1,n+1)*1e-15 #Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
-
 #Time domain
-t=np.linspace(-5e-15,(n+1)*1e-15+5e-15,x)
+t=np.linspace((n+1)*-1e-15 - 10e-15,(n+1)*1e-15 + 10e-15,x)
+#Frequency Domain
+wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequency
+w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)
+
+'''
+#Generate Data
+efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
+tfield = efieldtmpt.time_field()
+
+t_shift = np.fft.ifftshift(t)
+efieldtmpt_shift = time_Efield(Aks,wks,phiks,tks,sigmaks,t_shift)
+tfield_shift = efieldtmpt_shift.time_field()
+
+ffield_fft = np.fft.fft(tfield_shift)
+
+plt.figure()
+plt.plot(tfield)
+plt.figure()
+plt.plot(ffield_fft)
+'''
+
 
 #Create empty Pandas DataFrames to append to with data
 PhiData = pd.DataFrame()
@@ -74,8 +95,14 @@ for i in range(z):
     phiks = np.random.random(n)*2*np.pi
     efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
     tfield = efieldtmpt.time_field()
+    
+    t_shift = np.fft.ifftshift(t)
+    efieldtmpt_shift = time_Efield(Aks,wks,phiks,tks,sigmaks,t_shift)
+    tfield_shift = efieldtmpt_shift.time_field()
+
+    ffield_fft = np.fft.fft(tfield_shift)
     It = np.abs(tfield)**2
-    Iw =  np.abs(np.fft.fft(tfield))**2
+    Iw =  np.abs(ffield_fft)**2
     phid = pd.DataFrame(phiks).T
     Iwd = pd.DataFrame(Iw).T
     Itd = pd.DataFrame(It).T
@@ -86,7 +113,6 @@ for i in range(z):
 
 #Also will make a dataset to encode domains
 TimeData = pd.DataFrame(t).T
-FrequencyData = pd.DataFrame(freq).T
 #Rename columns annd rows for better readability
 for i in range(n):
     PhiData = PhiData.rename(columns={i:'Phi' + str(i+1)})
@@ -94,7 +120,6 @@ for i in range(x):
     IntensityTimeData = IntensityTimeData.rename(columns={i:'I' + str(i+1)})
     IntensityFreqData = IntensityFreqData.rename(columns={i:'I' + str(i+1)})
     TimeData = TimeData.rename(columns={i:'t' + str(i+1)})
-    FrequencyData = FrequencyData.rename(columns={i:'w' + str(i+1)})
 
 #Retrieve date to automatically create directory
 now = datetime.datetime.now()
@@ -112,5 +137,4 @@ if not os.path.exists(final_directory):
 IntensityFreqData.to_csv(final_directory + '\FreqIntensity.csv', index=False)
 IntensityTimeData.to_csv(final_directory + '\TimeIntensity.csv', index=False)
 PhiData.to_csv(final_directory + '\Phis.csv', index=False)
-FrequencyData.to_csv(final_directory + '\Frequency.csv', index=False)
 TimeData.to_csv(final_directory + '\Time.csv', index=False)

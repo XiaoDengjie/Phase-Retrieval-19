@@ -70,7 +70,8 @@ class freq_Efield(object):
 e_charge = 1.602176565e-19
 h_plank = 6.62607004e-34
 c_speed = 299792458
-x = 1000 #Number of points to test in frequeny and time domain
+#MUST BE AN ODD NUMBER
+x = 1001 #Number of points to test in frequeny and time domain
 
 #Inputs
 ph_en = 8300 #in the uint of eV
@@ -85,24 +86,24 @@ phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
 tks = np.arange(1,n+1)*1e-15 #Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
 #Time domain
-t=np.linspace(-1e-15,(n+1)*1e-15 + 1e-15,x)
+t=np.linspace((n+1)*-1e-15 - 10e-15,(n+1)*1e-15 + 10e-15,x)
 #Frequency Domain
 wrange = np.array([1-1e-3,1+1e-3])*w_cen #Domain centered around central frequency
 w=np.arange(wrange[0],wrange[1],(wrange[1]-wrange[0])/x)
 
 '''
-Way to generate electric field in time domain
+#Way to generate electric field in time domain
 efieldtmpt = time_Efield(Aks,wks,phiks,tks,sigmaks,t)
 tfield = efieldtmpt.time_field()
+plt.figure()
 plt.plot(t,abs(tfield)**2)
 
-Way to generate electric field in frequency domain
+#Way to generate electric field in frequency domain
 efieldtmpf = freq_Efield(Aks,wks,phiks,tks,sigmaks,w)
 ffield = efieldtmpf.freq_field()
+plt.figure()
 plt.plot(w,abs(ffield)**2)
 
-Important Note is that we are dealing with Intensity which is the E
-field modulus squared
 '''
 
 #Create empty Pandas DataFrames to append to with data
