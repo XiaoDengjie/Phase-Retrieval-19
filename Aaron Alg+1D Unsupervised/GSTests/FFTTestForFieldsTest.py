@@ -116,7 +116,7 @@ axs[2].plot(np.imag(ffield_fft),label='Imag')
 axs[2].legend()
 
 
-fig1, axs1 = plt.subplots(2, 1)
+fig1, axs1 = plt.subplots(1, 2)
 axs1[0].plot(w,np.abs(ffield),label='Magnitude')
 axs1[0].legend()
 axs1[1].plot(w,np.abs(ffield_fft),label='Magnitude')
@@ -125,6 +125,13 @@ axs1[1].legend()
 
 TimeElectricAmp = np.abs(tfield)
 FreqElectricAmp = np.abs(ffield_fft)
+
+fig1, axs1 = plt.subplots(1, 2)
+axs1[0].set_title('Electric Field Time Domain Amplitude')
+axs1[0].plot(TimeElectricAmp,label='Magnitude')
+axs1[1].set_title('Electric Field Frequency Domain Amplitude')
+axs1[1].plot(FreqElectricAmp,label='Magnitude')
+
 
 def GSFreq(iterations,TimeAmp,FreqAmp,seed):
     #set seed if you want to test same initial conditions
@@ -166,29 +173,34 @@ axs2[1,1].plot(np.imag(ffield_fft),label='Imag')
 axs2[1,1].legend()
 '''
 
+#Define Normalization function
+def Normalize(actual,guess):
+    numer = np.abs(guess - actual)
+    denom = np.sqrt(np.abs(guess)**2 + np.abs(actual)**2)
+    Normal = numer/denom
+    return Normal
+
 #Generate lots of data points to observe best initial condition
 z = 100
 All_TimeDiff = np.zeros(z)
 All_FreqDiff = np.zeros(z)
 for i in range(z):
     Et, Ew = GSFreq(50,TimeElectricAmp,FreqElectricAmp,i)
-    TimeDifference = np.linalg.norm(np.abs(Et-tfield)**2)
-    FreqDifference = np.linalg.norm(np.abs(Ew-ffield_fft)**2)
+    TimeDifference = np.linalg.norm(Normalize(tfield,Et))
+    FreqDifference = np.linalg.norm(Normalize(ffield,Ew))
     All_TimeDiff[i] = TimeDifference
     All_FreqDiff[i] = FreqDifference
 
-
+#Plot different error in time and freq space. Because fourier pair, same shape
 fig3, axs3 = plt.subplots(2, 1)
 axs3[0].plot(All_TimeDiff)
 axs3[1].plot(All_FreqDiff)
 
+print(All_TimeDiff[90])
+
 #Check lowest seed number: it is 91. 90,15,30 all good
 np.argmin(All_TimeDiff)
-
-Et90, Ew90 = GSFreq(100,TimeElectricAmp,FreqElectricAmp,90)
-Et91, Ew91 = GSFreq(100,TimeElectricAmp,FreqElectricAmp,30)
-
-Et, Ew = GSFreq(100,TimeElectricAmp,FreqElectricAmp,90)
+Et, Ew = GSFreq(100,TimeElectricAmp,FreqElectricAmp,23)
 fig2, axs2 = plt.subplots(2, 2)
 axs2[0,0].set_title("GS Data")
 axs2[0,0].plot(np.real(Et),label='Real')
@@ -205,15 +217,32 @@ axs2[1,1].plot(np.real(ffield_fft),label='Real')
 axs2[1,1].plot(np.imag(ffield_fft),label='Imag')
 axs2[1,1].legend()
 
+#Observe freq and time error per iteration
+x = 20
+IterErrorFreq = np.zeros(x)
+IterErrorTime = np.zeros(x)
+for i in range(1,x):
+    Et, Ew = GSFreq(i,TimeElectricAmp,FreqElectricAmp,15)
+    TimeDifference = np.linalg.norm(np.abs(Et-tfield)**2)
+    FreqDifference = np.linalg.norm(np.abs(Ew-ffield_fft)**2)
+    IterErrorTime[i] = TimeDifference
+    IterErrorFreq[i] = FreqDifference
+
+fig4, axs4 = plt.subplots(2, 1)
+axs4[0].plot(IterErrorTime)
+axs4[1].plot(IterErrorFreq)
+
+#Compare two seeds that both converge to basically same, correct solution
+Et90, Ew90 = GSFreq(100,TimeElectricAmp,FreqElectricAmp,90)
+Et91, Ew91 = GSFreq(100,TimeElectricAmp,FreqElectricAmp,91)
 DiffSolu = np.linalg.norm(np.abs(Et90-Et91)**2)
 print(DiffSolu)
 
-
 np.random.seed(90)
-phase_time90 = 2*np.pi*np.random.random(len(FreqElectricAmp))
+phase_time90 = np.exp(1j*2*np.pi*np.random.random(len(FreqElectricAmp)))
 np.random.seed(91)
-phase_time91 = 2*np.pi*np.random.random(len(FreqElectricAmp))
+phase_time91 = np.exp(1j*2*np.pi*np.random.random(len(FreqElectricAmp)))
 
 plt.figure()
-plt.plot(phase_time90)
+plt.plot((phase_time90))
 plt.plot(phase_time91)
