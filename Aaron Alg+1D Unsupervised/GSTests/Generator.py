@@ -77,7 +77,7 @@ np.random.seed(1) #Set seed if want to create reproducable results
 Aks = np.ones(n) #np.random.rayleigh(size=n) is true variation
 wks = np.ones(n)*w_cen #np.random.normal(w_cen,10**-4*w_cen,n) true variation
 phiks = np.random.random(n)*2*np.pi #random values between 0 and 2pi
-tks = np.arange(0,n)*1e-15 - 0.5e-15 #Will probably introduce variation later
+tks = np.arange(0,n)*1e-15 - (n-1)*0.5e-15#Will probably introduce variation later
 sigmaks = np.ones(n)*0.3e-15 #fixed gaussian width
 
 #Domain IMPORTANT (Still not sure how to make freq domain line up)

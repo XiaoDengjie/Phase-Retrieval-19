@@ -26,6 +26,37 @@ def GSFreq(iterations,TimeAmp,FreqAmp,seed):
         phase_time = np.angle(Guess_Time) 
     return Et, Ew
 
+def LossFunctionTime(actual,guess):
+    #Define number to check difference around center
+    x = 150
+    middle = int((len(actual)-1)/2)
+    #Calculate numerator
+    numer = np.abs(guess - actual)
+    #Calculate denominator
+    denom = np.abs(guess) + np.abs(actual)
+    #Initialize zero array to populate with values we care about
+    Loss = np.zeros(len(numer))
+    for i in range(middle-x,middle+x):
+        Loss[i] = numer[i]/denom[i]
+    NLoss = np.linalg.norm(Loss)/np.sqrt(2*x)
+    return NLoss
+
+def LossFunctionFreq(actual,guess):
+    #The function is in a different location than the center
+    #Must look manually and determine region of interest
+    x1 = 100
+    x2 = 175
+    #Calculate numerator
+    numer = np.abs(guess - actual)
+    #Calculate denominator
+    denom = np.abs(guess) + np.abs(actual)
+    #Initialize zero array to populate with values we care about
+    Loss = np.zeros(len(numer))
+    for i in range(x1,x2):
+        Loss[i] = numer[i]/denom[i]
+    NLoss = np.linalg.norm(Loss)/np.sqrt(x2-x1)
+    return NLoss
+
 '''
 #Good way to graph an iteration of GS against actual functions
 fig2, axs2 = plt.subplots(2, 2)
